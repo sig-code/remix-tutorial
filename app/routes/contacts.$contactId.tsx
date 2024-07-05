@@ -1,5 +1,5 @@
 import { Form, json, useLoaderData } from "@remix-run/react";
-import type { FunctionComponent } from "react";
+import { type FunctionComponent } from "react";
 import { getContact, type ContactRecord } from "../data";
 import { LoaderFunctionArgs } from "@remix-run/node";
 import invariant from "tiny-invariant";
