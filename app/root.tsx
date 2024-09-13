@@ -15,10 +15,9 @@ import {
 } from "@remix-run/react";
 import styles from "./tailwind.css?url";
 import { createEmptyContact, getContacts } from "./data";
+import { useEffect } from "react";
 
-export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: styles },
-];
+export const links: LinksFunction = () => [{ rel: "stylesheet", href: styles }];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
