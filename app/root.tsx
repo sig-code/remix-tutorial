@@ -13,12 +13,12 @@ import {
   useNavigation,
   useSubmit,
 } from "@remix-run/react";
-import appStylesHref from "./app.css?url";
+import styles from "./tailwind.css?url";
 import { createEmptyContact, getContacts } from "./data";
 import { useEffect } from "react";
 
 export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: appStylesHref },
+  { rel: "stylesheet", href: styles },
 ];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
