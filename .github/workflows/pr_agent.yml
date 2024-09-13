@@ -1,0 +1,72 @@
+name: PR Agent Workflow
+
+on:
+  pull_request:
+    types: [opened, synchronize] # PR作成時と更新時に実行
+
+env:
+  COMMON_INSTRUCTIONS: |
+    以下の指示に従って行ってください：
+    1. 説明はすべて日本語で記述してください。日本語でない場合はペナルティが発生します。
+    2. ただし、以下の場合は例外とします：
+      a) 技術用語、専門用語、製品名などは、一般的に使用される形式（日本語または英語）を使用してください。
+      b) 日本語に訳すと意味が不明確になったり、ニュアンスが失われたりする表現は、原語（主に英語）のまま使用してください。
+    3. 原語を使用する場合は、必要に応じて括弧書きで簡単な説明や日本語訳を付け加えてください。
+    4. 文章の構造や文法は日本語に従い、原語の使用は単語やフレーズレベルに留めてください。
+    5. 技術的な専門用語は必要に応じて使用しますが、できるだけ平易な日本語で説明するよう心がけてください。
+
+jobs:
+  pr_agent:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: write
+    name: Run PR Agent
+    if: ${{ github.event.sender.type != 'Bot' }}
+
+    steps:
+      - name: Debug
+        run: |
+          echo "GITHUB_EVENT_NAME: ${{ github.event_name }}"
+          echo "GITHUB_EVENT_ACTION: ${{ github.event.action }}"
+
+      - name: PR Agent action step
+        id: pragent
+        uses: Codium-ai/pr-agent@v0.24
+        env:
+          OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          # 基本設定
+          CONFIG.MODEL: "gpt-4o-mini-2024-07-18"
+          CONFIG.VERBOSITY_LEVEL: "2"
+
+          # PR Reviewer 設定
+          PR_REVIEWER.EXTRA_INSTRUCTIONS: ${{ env.COMMON_INSTRUCTIONS }}
+          PR_REVIEWER.REQUIRE_CAN_BE_SPLIT: "true"
+
+          # PR Description 設定
+          PR_DESCRIPTION.EXTRA_INSTRUCTIONS: |
+            ${{ env.COMMON_INSTRUCTIONS }}
+            6. 既存の説明の下に新しい情報を追加し、上書きはしないでください。タイトルは上書きしないでください。
+          PR_DESCRIPTION.PUBLISH_LABELS: "false"
+          # PR Code Suggestions 設定
+          PR_CODE_SUGGESTIONS.EXTRA_INSTRUCTIONS: ${{ env.COMMON_INSTRUCTIONS }}
+          PR_CODE_SUGGESTIONS.NUM_CODE_SUGGESTIONS: "4"
+          PR_CODE_SUGGESTIONS.SUGGESTIONS_SCORE_THRESHOLD: "2"
+
+          # PR Update Changelog 設定
+          PR_UPDATE_CHANGELOG.EXTRA_INSTRUCTIONS: ${{ env.COMMON_INSTRUCTIONS }}
+
+          # 自動実行設定
+          github_action_config.auto_review: "true"
+          github_action_config.auto_describe: "true"
+          github_action_config.auto_improve: "true"
+
+      - name: Output PR Agent Results
+        if: always()
+        run: |
+          echo "Auto Review: ${{ env.github_action_config.auto_review }}"
+          echo "Auto Describe: ${{ env.github_action_config.auto_describe }}"
+          echo "Auto Improve: ${{ env.github_action_config.auto_improve }}"
