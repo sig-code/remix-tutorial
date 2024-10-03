@@ -20,7 +20,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
   return json({ contact });
 };
 
-export default function Contact() {
+export function Contact() {
   const { contact } = useLoaderData<typeof loader>();
 
   return (
@@ -65,7 +65,7 @@ export default function Contact() {
             method="post"
             onSubmit={(event) => {
               const response = confirm(
-                "Please confirm you want to delete this record.",
+                "Please confirm you want to delete this record."
               );
               if (!response) {
                 event.preventDefault();
